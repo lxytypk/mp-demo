@@ -48,10 +48,7 @@ public class UserController {
     @ApiOperation("根据id批量查询用户接口")
     @GetMapping
     public List<UserVO> queryUserByIds(@ApiParam("用户id集合") @RequestParam("ids") List<Long> ids){
-        //1.查询用户PO
-        List<User> users = userService.listByIds(ids);
-        //2.将PO拷贝到VO
-        return BeanUtil.copyToList(users, UserVO.class);
+        return userService.queryUserAndAddressByIds(ids);
     }
 
     @ApiOperation("扣减用户余额接口")

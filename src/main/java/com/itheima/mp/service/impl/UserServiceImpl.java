@@ -13,7 +13,9 @@ import com.itheima.mp.service.IUserService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IUserService {
@@ -70,5 +72,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             userVO.setAddresses(BeanUtil.copyToList(addresses, AddressVO.class));
         }
         return userVO;
+    }
+
+    @Override
+    public List<UserVO> queryUserAndAddressByIds(List<Long> ids) {
+        //1.查询用户
+        List<User> users = listByIds(ids);
+        if(CollUtil.isNotEmpty(users)){
+            return Collections.emptyList();
+        }
+        //2.查询地址
+        //2.1获取用户id集合
+        List<Long> userIds = users.stream().map(User::getId).collect(Collectors.toList());
+        //2.2根据用户id查询地址
+
+        return null;
     }
 }
