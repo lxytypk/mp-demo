@@ -10,11 +10,11 @@ import com.itheima.mp.domain.vo.AddressVO;
 import com.itheima.mp.domain.vo.UserVO;
 import com.itheima.mp.mapper.UserMapper;
 import com.itheima.mp.service.IUserService;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -85,7 +85,24 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         //2.1获取用户id集合
         List<Long> userIds = users.stream().map(User::getId).collect(Collectors.toList());
         //2.2根据用户id查询地址
+        List<Address> addresses = Db.lambdaQuery(Address.class).in(Address::getUserId, userIds).list();
+        //2.3转换地址VO
+        List<AddressVO> addressVOList = BeanUtil.copyToList(addresses, AddressVO.class);
+        //2.4用户地址集合分组处理，相同用户的放入一个集合（组）中
+        Map<Long,List<AddressVO>> addressMap = new HashMap<>(0);
+        if(CollUtil.isNotEmpty(addresses)){
+            addressMap = addressVOList.stream().collect(Collectors.groupingBy(AddressVO::getUserId));
+        }
 
-        return null;
+        //3.转换VO返回
+        List<UserVO> list = new ArrayList<>(users.size());
+        for(User user : users){
+            //3.1转换User的PO为VO
+            UserVO vo = BeanUtil.copyProperties(user, UserVO.class);
+            //3.2转换地址VO
+            vo.setAddresses(addressMap.get(user.getId()));
+        }
+
+        return list;
     }
 }
